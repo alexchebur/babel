@@ -782,11 +782,10 @@
                     });
                     
                     // Обновляем мета-информацию
+                    // Обновляем мета-информацию
                     metaInfo.innerHTML = `
-                        Книга ${bookNumber.toLocaleString()}, страница ${pageNumber.toLocaleString()}
-                        <br>
-                        Всего слов: 100 | Словосочетаний: ${sentences.length}
-                    `;
+                        Том ${bookNumber}, страница ${pageNumber}
+`                   ;
                     
                     // Прокручиваем к началу контента
                     contentArea.scrollTop = 0;
