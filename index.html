@@ -498,7 +498,7 @@
                     // 30% шанс выбрать слово, отличное от предыдущего для большего разнообразия
                     do {
                         index = Math.floor(prng() * wordList.length);
-                    } while (index === russianWords[i-1]);
+                    } while (wordList[index] === russianWords[i-1]);
                 } else {
                     index = Math.floor(prng() * wordList.length);
                 }
