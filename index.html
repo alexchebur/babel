@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вавилонская библиотека</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0e17 0%, #1a1c29 100%);
+            color: #e6d3a7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(49, 72, 112, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(82, 52, 94, 0.15) 0%, transparent 20%);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(18, 22, 37, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(100, 116, 166, 0.3);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(65, 85, 130, 0.2);
+            padding: 1.5rem;
+            margin: 1rem auto;
+            position: relative;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #5d4a82, #4a5d82, #824a5d);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #5d4a82, transparent);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #c5a47e, #a88b69, #c5a47e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            color: #8a9db0;
+            margin-top: 0.5rem;
+            font-style: italic;
+            line-height: 1.5;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+        
+        .input-field {
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+            color: #a3b3c6;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(100, 116, 166, 0.4);
+            background: rgba(25, 30, 47, 0.7);
+            color: #e6d3a7;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #5d4a82;
+            box-shadow: 0 0 0 3px rgba(93, 74, 130, 0.3);
+        }
+        
+        .generate-btn {
+            background: linear-gradient(120deg, #5d4a82 0%, #4a5d82 100%);
+            color: #f8f4e9;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(65, 45, 100, 0.4);
+            letter-spacing: 0.5px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 1.5rem;
+            display: block;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(65, 45, 100, 0.6);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .generate-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+        
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+        
+        .book-content {
+            width: 100%;
+            min-height: 200px;
+        }
+        
+        .sentence {
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-left: 1rem;
+        }
+        
+        .sentence::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            height: calc(100% - 1rem);
+            width: 2px;
+            background: linear-gradient(to bottom, #5d4a82, #4a5d82);
+            border-radius: 2px;
+        }
+        
+        .fantasy-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            color: #8a9db0;
+            letter-spacing: 1px;
+            line-height: 1.5;
+            margin-bottom: 0.3rem;
+            font-weight: 300;
+        }
+        
+        .russian-text {
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            color: #e6d3a7;
+            line-height: 1.6;
+            font-weight: 400;
+            text-indent: 0.3rem;
+            text-shadow: 0 0 2px rgba(197, 164, 126, 0.3);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 2px rgba(197, 164, 126, 0.3), 0 0 4px rgba(197, 164, 126, 0.2);
+            }
+            to {
+                text-shadow: 0 0 4px rgba(197, 164, 126, 0.5), 0 0 8px rgba(197, 164, 126, 0.3);
+            }
+        }
+        
+        .meta {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(100, 116, 166, 0.3);
+            color: #8a9db0;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+        
+        .footer-note {
+            margin-top: 2rem;
+            text-align: center;
+            color: #6a7a99;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+        
+        .content-area {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            padding-right: 8px;
+        }
+        
+        .content-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .content-area::-webkit-scrollbar-track {
+            background: rgba(25, 30, 47, 0.3);
+            border-radius: 3px;
+        }
+        
+        .content-area::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #5d4a82, #4a5d82);
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 480px) {
+            .content-area {
+                max-height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Вавилонская библиотека</h1>
+            <p class="subtitle">"Вселенная (которую другие называют библиотекой) состоит из неопределенного, а может быть, и бесконечного числа шестиугольных галерей..." — Хорхе Луис Борхес</p>
+        </header>
+        
+        <div class="input-group">
+            <div class="input-field">
+                <label for="book-number">Номер книги</label>
+                <input type="number" id="book-number" min="1" value="467">
+            </div>
+            <div class="input-field">
+                <label for="page-number">Номер страницы</label>
+                <input type="number" id="page-number" min="1" value="289">
+            </div>
+        </div>
+        
+        <button class="generate-btn" id="generate-btn">Открыть книгу</button>
+        
+        <div class="content-area" id="content-area">
+            <div class="book-content" id="book-content">
+                <div style="text-align: center; color: #8a9db0; padding: 2rem;">
+                    <p>Нажмите кнопку "Открыть книгу", чтобы увидеть содержимое страницы</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="meta" id="meta-info">
+            Книга 467, страница 289<br>Всего слов: 0 | Словосочетаний: 0
+        </div>
+        
+        <p class="footer-note">
+            Каждая книга содержит бесконечное число страниц. Каждая страница — сто слов. Все книги Библиотеки в каком-то порядке повторяются. 
+            Некоторые книги имеют смысл, большинство — хаотичны. Возможно, где-то есть перевод... Возможно, толкование придется придумать...
+        </p>
+    </div>
+
+    <script>
+        // Расширенные словари с максимальным разнообразием понятий
+        const adjectives = [
+            // Исходные 30 слов
+            'бесконечный', 'тайный', 'забытый', 'светлый', 'темный', 
+            'древний', 'новый', 'странный', 'обычный', 'чужой',
+            'родной', 'высокий', 'низкий', 'широкий', 'узкий',
+            'теплый', 'холодный', 'живой', 'мертвый', 'пустой',
+            'полный', 'быстрый', 'медленный', 'тихий', 'громкий',
+            'длинный', 'короткий', 'тяжелый', 'легкий', 'простой',
+            
+            // Новые 30 слов из разнообразных сфер
+            'яркий', 'туманный', 'вечный', 'мимолетный', 'сложный',
+            'прозрачный', 'непрозрачный', 'музыкальный', 'безмолвный', 'звонкий',
+            'звездный', 'лунный', 'солнечный', 'космический', 'земной',
+            'водный', 'огненный', 'воздушный', 'временной', 'пространственный',
+            'цифровой', 'аналоговый', 'биологический', 'химический', 'физический',
+            'философский', 'математический', 'поэтический', 'практический', 'теоретический',
+            'абстрактный', 'конкретный', 'символический', 'реальный', 'виртуальный',
+            'эмоциональный', 'рациональный', 'иррациональный', 'логический', 'хаотичный',
+            'гармоничный', 'дисгармоничный', 'симметричный', 'асимметричный', 'фрактальный',
+            'квантовый', 'классический', 'релятивистский', 'термодинамический', 'электромагнитный'
+        ];
+
+        const nouns = [
+            // Исходные 30 слов
+            'лабиринт', 'книга', 'дверь', 'окно', 'ключ',
+            'зеркало', 'время', 'пространство', 'свет', 'тьма',
+            'вода', 'огонь', 'ветер', 'земля', 'небо',
+            'звезда', 'луна', 'солнце', 'тень', 'мысль',
+            'слово', 'знак', 'число', 'буква', 'линия',
+            'круг', 'треугольник', 'квадрат', 'сфера', 'куб',
+            
+            // Новые 30 слов из разнообразных сфер
+            'гора', 'река', 'лес', 'океан', 'пустыня',
+            'цветок', 'камень', 'песок', 'облако', 'дождь',
+            'снег', 'молния', 'радуга', 'туман', 'рассвет',
+            'закат', 'человек', 'животное', 'птица', 'рыба',
+            'сердце', 'разум', 'душа', 'мечта', 'реальность',
+            'иллюзия', 'тайна', 'знание', 'свобода', 'музыка',
+            'тишина', 'краска', 'форма', 'цвет', 'запах',
+            'вкус', 'звук', 'память', 'будущее', 'прошлое',
+            'настоящее', 'атом', 'галактика', 'нейрон', 'ген',
+            'вирус', 'робот', 'алгоритм', 'код', 'сеть',
+            'планета', 'метеорит', 'черная дыра', 'корпускула', 'волна',
+            'частица', 'поле', 'энергия', 'масса', 'гравитация'
+        ];
+
+        const verbs = [
+            // Исходные 30 слов
+            'существует', 'исчезает', 'меняется', 'остается', 'движется',
+            'стоит', 'лежит', 'сидит', 'говорит', 'молчит',
+            'слушает', 'видит', 'слышит', 'помнит', 'забывает',
+            'ищет', 'находит', 'теряет', 'строит', 'ломает',
+            'пишет', 'читает', 'думает', 'чувствует', 'знает',
+            'любит', 'ненавидит', 'боится', 'надеется', 'ждет',
+            
+            // Новые 30 слов из разнообразных сфер
+            'летает', 'плавает', 'растет', 'увядает', 'смеется',
+            'плачет', 'поет', 'танцует', 'рисует', 'создает',
+            'разрушает', 'объединяет', 'разделяет', 'светит', 'темнеет',
+            'дышит', 'живет', 'умирает', 'рождается', 'путешествует',
+            'мечтает', 'спит', 'просыпается', 'вращается', 'падает',
+            'поднимается', 'течет', 'замерзает', 'тает', 'пахнет',
+            'звучит', 'мерцает', 'отражается', 'появляется', 'растворяется',
+            'конденсируется', 'испаряется', 'взрывается', 'сжимается', 'расширяется',
+            'притягивается', 'отталкивается', 'резонирует', 'колеблется', 'флуктуирует',
+            'трансформируется', 'метаморфизируется', 'кристаллизуется', 'декодируется', 'шифруется',
+            'анализируется', 'синтезируется', 'дифференцируется', 'интегрируется', 'интерпретируется'
+        ];
+
+        // Фантастические слоги
+        const fantasySyllables = [
+            'zoth', 'karn', 'ulth', 'xan', 'vorth', 'glo', 'thar', 'morn', 'drin', 'feln',
+            'yag', 'zul', 'korv', 'neth', 'shor', 'quor', 'vex', 'zarn', 'thrul', 'mog',
+            'krel', 'dros', 'fyn', 'gath', 'hol', 'jarn', 'koth', 'lum', 'nex', 'oryn',
+            'plox', 'queth', 'rul', 'syn', 'tov', 'uln', 'vor', 'wyn', 'xul', 'yor',
+            'zeph', 'argh', 'bryl', 'cyth', 'dorn', 'elth', 'farg', 'gryn', 'hul', 'ix',
+            'jor', 'kyl', 'lyth', 'myrn', 'nix', 'oth', 'pyl', 'qor', 'ryn', 'synth',
+            'tyl', 'ulth', 'vryn', 'wex', 'xorn', 'yul', 'zarn', 'aeg', 'byth', 'cyth',
+            'dyrn', 'exul', 'fyth', 'gyrn', 'hyll', 'ixor', 'jyln', 'kyth', 'lyth', 'myx',
+            'nul', 'oyrn', 'pyx', 'qyln', 'ryth', 'syx', 'tyrn', 'ulx', 'vyth', 'wyrn',
+            
+            // Дополнительные слоги для большего разнообразия
+            'zalq', 'krenx', 'throx', 'vyss', 'phlox', 'grath', 'mryx', 'drelm', 'squith', 'wryth',
+            'plern', 'kvox', 'thyss', 'zren', 'flarx', 'brynth', 'crux', 'dronth', 'elvix', 'fryth',
+            'gralx', 'hran', 'ixth', 'jryx', 'klyth', 'lornx', 'mrix', 'nryth', 'ovix', 'pryss',
+            'qrex', 'rynx', 'slyth', 'trx', 'uvyx', 'wrix', 'xyth', 'yzix', 'zryx', 'arvox',
+            'bryx', 'cryth', 'dryx', 'evyx', 'frox', 'grith', 'hryx', 'ivox', 'jryth', 'kryx',
+            'lryth', 'mrox', 'nryx', 'oryth', 'pryx', 'qryth', 'sryx', 'tryth', 'uryx', 'vryth',
+            'wryx', 'xryth', 'yryx', 'zryth', 'aerox', 'bryth', 'cryx', 'dryth', 'eryx', 'fryth'
+        ];
+
+        // Загадочные фразы для метасюжета (в духе Борхеса и Лавкрафта)
+        const mysteriousPhrases = [
+            "В шестиугольных галереях звучит эхо забытых языков.",
+            "Одна книга содержит карту всех остальных, но ее невозможно найти.",
+            "Стены библиотеки дышат пылью веков.",
+            "Существует человек, который прочел ту самую книгу, ее называют Аль Китаб",
+            "Ночью книги шепчутся между собой на языке, который никто не понимает.",
+            "Тени читателей танцуют на стеллажах под сводами.",
+            "Вода в фонтанах библиотеки имеет вкус забытых воспоминаний.",
+            "Каждый шаг в библиотеке уводит тебя ближе к началу.",
+            "Существует шестиугольник, из которого можно увидеть центр библиотеки.",
+            "Цифры в полях книг — это не номера страниц, а координаты в пространстве и времени.",
+            "Воздух в библиотеке пахнет старой бумагой и тайной.",
+            "Книги с пустыми страницами — самые опасные.",
+            "В библиотеке есть зеркала, которые показывают не отражение, а другие шестиугольники.",
+            "Ступени лестниц ведут не вверх и не вниз, а вбок — во времени.",
+            "Некоторые книги меняют свой текст, когда на них не смотришь.",
+            "В библиотеке время течет по спирали, подобно расположению стеллажей.",
+            "Между строк каждой книги спрятано имя того, кто ее написал.",
+            "Воздух гудит от невидимых голосов, читающих книги вслух.",
+            "Ключ к библиотеке — это не предмет, а состояние ума.",
+            "В шестиугольнике, где ты сейчас стоишь, когда-то был я.",
+            "Буквы в книгах иногда складываются в слова, которых нет ни в одном языке.",
+            "В библиотеке нет выхода, потому что она — вся вселенная.",
+            "Существует книга, которая описывает путь к самой себе.",
+            "Читатель и книга — одно и то же в разных измерениях.",
+            "Тишина в библиотеке — это голос самого здания.",
+            "Каждый раз, когда ты открываешь книгу, где-то в мире исчезает другая.",
+            "В библиотеке есть комната, где хранятся только заголовки книг.",
+            "Звезды на небе — это огни в окнах далеких шестиугольников.",
+            "Время здесь не линейно: ты читаешь книгу, которую еще не открыл.",
+            "Где-то здесь на пыльной полке лежит Аль Китаб - книга, в которой написана вся твоя жизнь, от первого до последнего вздоха."
+            "Теперь ты как никогда близок к открытию смысла Вавилонской библиотеки. Просто продолжай искать."
+        ];
+
+        // Seedable PRNG
+        function seedRandom(seed) {
+            const a = 1664525;
+            const c = 1013904223;
+            const m = Math.pow(2, 32);
+            let state = seed;
+            
+            return function() {
+                state = (a * state + c) % m;
+                return state / m;
+            };
+        }
+
+        // Глобальные переменные для отслеживания состояния метасюжета
+        let clickCount = 0;
+        let nextInjectionThreshold = 2 + Math.floor(Math.random() * 3); // случайное число от 2 до 4
+        let usedPhrases = new Set();
+        let availablePhrases = [...mysteriousPhrases]; // копия массива для выбора
+
+        // Генерация текста книги
+        function generateBookText(bookNumber, pageNumber) {
+            // Создаем seed из номера книги и страницы
+            const seed = bookNumber * 1000000 + pageNumber;
+            const prng = seedRandom(seed);
+            
+            // Генерируем 100 фантастических слогов
+            const fantasyWords = [];
+            for (let i = 0; i < 100; i++) {
+                const index = Math.floor(prng() * fantasySyllables.length);
+                fantasyWords.push(fantasySyllables[index]);
+            }
+            
+            // Генерируем 100 русских слов в порядке: прилагательное, существительное, глагол
+            const russianWords = [];
+            for (let i = 0; i < 100; i++) {
+                const posIndex = i % 3;
+                let wordList;
+                
+                if (posIndex === 0) {
+                    wordList = adjectives;
+                } else if (posIndex === 1) {
+                    wordList = nouns;
+                } else {
+                    wordList = verbs;
+                }
+                
+                // Выбираем случайное слово из списка с дополнительной логикой для разнообразия
+                let index;
+                if (i > 0 && prng() > 0.7) {
+                    // 30% шанс выбрать слово, отличное от предыдущего для большего разнообразия
+                    do {
+                        index = Math.floor(prng() * wordList.length);
+                    } while (index === russianWords[i-1]);
+                } else {
+                    index = Math.floor(prng() * wordList.length);
+                }
+                russianWords.push(wordList[index]);
+            }
+            
+            // Определяем длины предложений (в словах) - теперь от 1 до 3 триплетов (3-9 слов)
+            const sentenceLengths = [];
+            let wordsUsed = 0;
+            
+            // Разбиваем на предложения длиной от 3 до 9 слов (1-3 триплета)
+            while (wordsUsed < 100) {
+                // Определяем количество триплетов: 1, 2 или 3
+                const triplets = 1 + Math.floor(prng() * 3); // 1, 2 или 3
+                let sentenceLength = triplets * 3;
+                
+                // Если осталось меньше слов, чем нужно для предложения
+                if (wordsUsed + sentenceLength > 100) {
+                    // Используем оставшиеся слова, но округляем до кратного 3
+                    const remaining = 100 - wordsUsed;
+                    if (remaining >= 3) {
+                        sentenceLength = Math.floor(remaining / 3) * 3;
+                    } else if (remaining > 0) {
+                        // Если осталось 1 или 2 слова, добавляем их как отдельное короткое предложение
+                        sentenceLength = remaining;
+                    } else {
+                        break;
+                    }
+                }
+                
+                if (sentenceLength > 0) {
+                    sentenceLengths.push(sentenceLength);
+                    wordsUsed += sentenceLength;
+                }
+            }
+            
+            // Формируем предложения
+            const sentences = [];
+            let currentIndex = 0;
+            
+            for (const length of sentenceLengths) {
+                const fantasySentence = fantasyWords.slice(currentIndex, currentIndex + length);
+                const russianSentence = russianWords.slice(currentIndex, currentIndex + length);
+                currentIndex += length;
+                
+                sentences.push({
+                    type: 'normal',
+                    fantasy: fantasySentence.join(' '),
+                    russian: formatRussianSentence(russianSentence, length)
+                });
+            }
+            
+            return sentences;
+        }
+
+        // Форматирование русского предложения
+        function formatRussianSentence(words, length) {
+            // Если одно или два слова
+            if (length <= 2) {
+                return words.join(' ') + '.';
+            }
+            
+            // Если длина кратна 3, разбиваем на связки
+            if (length % 3 === 0) {
+                const triplets = [];
+                for (let i = 0; i < length; i += 3) {
+                    triplets.push(`${words[i]} ${words[i+1]} ${words[i+2]}`);
+                }
+                // Добавляем запятые между связками, кроме последней
+                if (triplets.length > 1) {
+                    return triplets.join(', ') + '.';
+                } else {
+                    return triplets[0] + '.';
+                }
+            }
+            
+            // Для остальных случаев (теоретически не должно быть)
+            return words.join(' ') + '.';
+        }
+
+        // Отображение текста книги
+        function displayBookContent() {
+            const bookNumber = parseInt(document.getElementById('book-number').value) || 1;
+            const pageNumber = parseInt(document.getElementById('page-number').value) || 1;
+            
+            const contentContainer = document.getElementById('book-content');
+            const metaInfo = document.getElementById('meta-info');
+            const contentArea = document.getElementById('content-area');
+            
+            // Увеличиваем счетчик нажатий
+            clickCount++;
+            
+            // Показываем, что идет загрузка
+            contentContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #8a9db0;">Листаем страницы...</div>';
+            
+            // Используем небольшую задержку для обновления UI
+            setTimeout(() => {
+                try {
+                    // Генерируем текст
+                    let sentences = generateBookText(bookNumber, pageNumber);
+                    
+                    // Проверяем, нужно ли вставить инъекцию метасюжета
+                    if (clickCount >= nextInjectionThreshold && availablePhrases.length > 0) {
+                        // Выбираем случайную фразу из оставшихся
+                        const randomIndex = Math.floor(Math.random() * availablePhrases.length);
+                        const phrase = availablePhrases.splice(randomIndex, 1)[0];
+                        usedPhrases.add(phrase);
+                        
+                        // Определяем позицию для вставки (случайное место в тексте)
+                        const insertPosition = Math.floor(Math.random() * (sentences.length + 1));
+                        
+                        // Создаем элемент инъекции в том же стиле, что и обычные предложения
+                        const injectionElement = {
+                            type: 'injection',
+                            fantasy: generateFantasyEquivalent(phrase),
+                            russian: phrase
+                        };
+                        
+                        // Вставляем инъекцию в массив предложений
+                        sentences.splice(insertPosition, 0, injectionElement);
+                        
+                        // Устанавливаем новый порог для следующей инъекции (2-4 нажатия)
+                        nextInjectionThreshold = clickCount + 2 + Math.floor(Math.random() * 3);
+                    }
+                    
+                    // Очищаем контейнер
+                    contentContainer.innerHTML = '';
+                    
+                    // Добавляем предложения и инъекции
+                    sentences.forEach(sentence => {
+                        const sentenceDiv = document.createElement('div');
+                        sentenceDiv.className = 'sentence';
+                        
+                        const fantasyDiv = document.createElement('div');
+                        fantasyDiv.className = 'fantasy-text';
+                        fantasyDiv.textContent = sentence.fantasy;
+                        
+                        const russianDiv = document.createElement('div');
+                        russianDiv.className = 'russian-text';
+                        russianDiv.textContent = sentence.russian;
+                        
+                        sentenceDiv.appendChild(fantasyDiv);
+                        sentenceDiv.appendChild(russianDiv);
+                        contentContainer.appendChild(sentenceDiv);
+                    });
+                    
+                    // Обновляем мета-информацию
+                    metaInfo.innerHTML = `
+                        Книга ${bookNumber.toLocaleString()}, страница ${pageNumber.toLocaleString()}
+                        <br>
+                        Всего слов: 100 | Словосочетаний: ${sentences.length}
+                    `;
+                    
+                    // Прокручиваем к началу контента
+                    contentArea.scrollTop = 0;
+                    
+                } catch (error) {
+                    contentContainer.innerHTML = '<div style="color: #ff6b6b; text-align: center; padding: 20px;">Ошибка при генерации текста. Пожалуйста, попробуйте еще раз.</div>';
+                    console.error('Error generating book content:', error);
+                }
+            }, 50);
+        }
+
+        // Генерация фантастического эквивалента для фразы метасюжета
+        function generateFantasyEquivalent(phrase) {
+            // Подсчитываем количество слов в фразе
+            const wordCount = phrase.split(' ').filter(word => word.trim() !== '').length;
+            
+            // Генерируем соответствующее количество фантастических слогов
+            const prng = seedRandom(clickCount * 1000 + phrase.length);
+            const fantasyWords = [];
+            for (let i = 0; i < wordCount; i++) {
+                const index = Math.floor(prng() * fantasySyllables.length);
+                fantasyWords.push(fantasySyllables[index]);
+            }
+            
+            return fantasyWords.join(' ');
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateBtn = document.getElementById('generate-btn');
+            
+            // Генерация по клику
+            generateBtn.addEventListener('click', displayBookContent);
+            
+            // Генерация по Enter в полях ввода
+            document.getElementById('book-number').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') displayBookContent();
+            });
+            
+            document.getElementById('page-number').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') displayBookContent();
+            });
+        });
+    </script>
+</body>
+</html>
