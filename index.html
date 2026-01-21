@@ -50,6 +50,7 @@
             padding: 1.5rem;
             margin: 1rem auto;
             position: relative;
+            z-index: 1;
         }
         
         .container::before {
@@ -273,6 +274,25 @@
             border-radius: 3px;
         }
         
+        /* Overlay для затемнения */
+        .dark-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            opacity: 0;
+            z-index: 1000;
+            pointer-events: none;
+            transition: opacity 8s ease-in-out;
+        }
+        
+        .dark-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
         @media (max-width: 480px) {
             .content-area {
                 max-height: 50vh;
@@ -317,6 +337,9 @@
             Некоторые книги имеют смысл, большинство — хаотичны. Возможно, где-то есть перевод...Или просто нужно истолковать знаки...
         </p>
     </div>
+    
+    <!-- Overlay для затемнения -->
+    <div class="dark-overlay" id="dark-overlay"></div>
 
     <script>
         // Расширенные словари с максимальным разнообразием понятий
@@ -426,14 +449,15 @@
             "Цифры в полях книг — это не номера страниц, а координаты в пространстве.",
             "Воздух в библиотеке пахнет старой бумагой и тайной.",
             "Книги с пустыми страницами — самые опасные.",
+            "Одна тысяча девятьсот семьдесят девятый...Важная дата, важная цифра",
             "В библиотеке есть зеркала, которые показывают не отражение, а другие шестиугольники.",
-            "Ступени лестниц ведут не вверх и не вниз, а вбок — во времени.",
             "Некоторые книги меняют свой текст, когда на них не смотришь.",
             "В библиотеке время течет по спирали, подобно расположению стеллажей.",
             "Между строк каждой книги спрятано имя того, кто ее написал.",
             "Воздух гудит от невидимых голосов, читающих книги вслух.",
             "Ключ к библиотеке — это не предмет, а состояние ума.",
             "В шестиугольнике, где ты сейчас стоишь, когда-то был я.",
+            "Ступени лестниц ведут не вверх и не вниз, а вбок — во времени, и этих ступеней 9987.",
             "Буквы в книгах иногда складываются в слова, которых нет ни в одном языке.",
             "В библиотеке нет выхода, потому что она — вся вселенная.",
             "Существует книга, которая описывает путь к самой себе.",
@@ -446,6 +470,9 @@
             "Где-то здесь она, книга Аль Китаб, в которой записана вся твоя жизнь, от первого до последнего вздоха",
             "Теперь ты как никогда близок к открытию смысла Вавилонской библиотеки. Просто продолжай искать."
         ];
+
+        // Финальный текст для секретной комбинации
+        const finalText = "Ты нашел ее, Аль Китаб. То что ты читаешь прямо сейчас, происходит прямо сейчас же с тобою, и одновременно написано здесь, в книге, которую ты читаешь прямо сейчас. Ты знаешь, что это не конец книги, и завтра будет новый день, и перелистнув страницу, ты узнаешь, что произойдет. Все, что было, есть и будет, вся твоя жизнь записана здесь. Эпидемии, войны, катаклизмы, призрачные моменты счастья - все это было скрыто на пожелтевших страницах. Прежде чем открыть следующую страницу, подумай как следует: готов ли ты узнать то, что еще не случилось, но неизбежно произойдет? Разве не страшит тебя возможно узнать это? Конечно страшит, и ты знаешь об этом, и об этом написано в строках, которые ты видишь. Решайся, сейчас или никогда.";
 
         // Seedable PRNG
         function seedRandom(seed) {
@@ -464,6 +491,7 @@
         let clickCount = 0;
         let nextInjectionThreshold = 2 + Math.floor(Math.random() * 3); // случайное число от 2 до 4
         let currentPhraseIndex = 0; // индекс текущей фразы для последовательного отображения
+        let hasTriggeredFinalSequence = false; // флаг для предотвращения повторного срабатывания
 
         // Генерация текста книги
         function generateBookText(bookNumber, pageNumber) {
@@ -579,6 +607,61 @@
             return words.join(' ') + '.';
         }
 
+        // Генерация фантастического эквивалента для фразы метасюжета
+        function generateFantasyEquivalent(phrase) {
+            // Подсчитываем количество слов в фразе
+            const wordCount = phrase.split(' ').filter(word => word.trim() !== '').length;
+            
+            // Генерируем соответствующее количество фантастических слогов
+            const prng = seedRandom(clickCount * 1000 + phrase.length);
+            const fantasyWords = [];
+            for (let i = 0; i < wordCount; i++) {
+                const index = Math.floor(prng() * fantasySyllables.length);
+                fantasyWords.push(fantasySyllables[index]);
+            }
+            
+            return fantasyWords.join(' ');
+        }
+
+        // Генерация финального текста в формате приложения
+        function generateFinalText() {
+            const sentences = [];
+            const words = finalText.split(' ');
+            let currentWords = [];
+            
+            // Разбиваем текст на части по 3-9 слов (1-3 триплета)
+            for (let i = 0; i < words.length; i++) {
+                currentWords.push(words[i]);
+                
+                // Проверяем, нужно ли завершить предложение
+                if (currentWords.length >= 9 || 
+                    (currentWords.length >= 3 && Math.random() > 0.7) ||
+                    i === words.length - 1) {
+                    
+                    // Убираем точку в конце последнего слова, если она есть
+                    if (currentWords.length > 0) {
+                        let lastWord = currentWords[currentWords.length - 1];
+                        if (lastWord.endsWith('.')) {
+                            currentWords[currentWords.length - 1] = lastWord.slice(0, -1);
+                        }
+                    }
+                    
+                    // Добавляем точку в конец предложения
+                    const sentenceText = currentWords.join(' ') + '.';
+                    
+                    sentences.push({
+                        type: 'final',
+                        fantasy: generateFantasyEquivalent(sentenceText),
+                        russian: sentenceText
+                    });
+                    
+                    currentWords = [];
+                }
+            }
+            
+            return sentences;
+        }
+
         // Отображение текста книги
         function displayBookContent() {
             const bookNumber = parseInt(document.getElementById('book-number').value) || 1;
@@ -587,8 +670,62 @@
             const contentContainer = document.getElementById('book-content');
             const metaInfo = document.getElementById('meta-info');
             const contentArea = document.getElementById('content-area');
+            const darkOverlay = document.getElementById('dark-overlay');
             
-            // Увеличиваем счетчик нажатий
+            // Проверяем секретную комбинацию
+            if (bookNumber === 1979 && pageNumber === 9987 && !hasTriggeredFinalSequence) {
+                // Устанавливаем флаг, чтобы предотвратить повторное срабатывание
+                hasTriggeredFinalSequence = true;
+                
+                // Показываем, что идет загрузка
+                contentContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #8a9db0;">Расшифровка Аль Китаб...</div>';
+                
+                setTimeout(() => {
+                    try {
+                        // Генерируем финальный текст
+                        const sentences = generateFinalText();
+                        
+                        // Очищаем контейнер
+                        contentContainer.innerHTML = '';
+                        
+                        // Добавляем предложения
+                        sentences.forEach(sentence => {
+                            const sentenceDiv = document.createElement('div');
+                            sentenceDiv.className = 'sentence';
+                            
+                            const fantasyDiv = document.createElement('div');
+                            fantasyDiv.className = 'fantasy-text';
+                            fantasyDiv.textContent = sentence.fantasy;
+                            
+                            const russianDiv = document.createElement('div');
+                            russianDiv.className = 'russian-text';
+                            russianDiv.textContent = sentence.russian;
+                            
+                            sentenceDiv.appendChild(fantasyDiv);
+                            sentenceDiv.appendChild(russianDiv);
+                            contentContainer.appendChild(sentenceDiv);
+                        });
+                        
+                        // Обновляем мета-информацию
+                        metaInfo.innerHTML = `
+                            Книга ${bookNumber.toLocaleString()}, страница ${pageNumber.toLocaleString()}
+                            <br>
+                            Ты нашел Аль Китаб
+                        `;
+                        
+                        // Прокручиваем к началу контента
+                        contentArea.scrollTop = 0;
+                        
+                    } catch (error) {
+                        contentContainer.innerHTML = '<div style="color: #ff6b6b; text-align: center; padding: 20px;">Ошибка при расшифровке Аль Китаб. Попробуйте снова.</div>';
+                        console.error('Error generating final text:', error);
+                    }
+                }, 50);
+                
+                return;
+            }
+            
+            // Увеличиваем счетчик нажатий (только если не секретная комбинация)
             clickCount++;
             
             // Показываем, что идет загрузка
@@ -661,20 +798,10 @@
             }, 50);
         }
 
-        // Генерация фантастического эквивалента для фразы метасюжета
-        function generateFantasyEquivalent(phrase) {
-            // Подсчитываем количество слов в фразе
-            const wordCount = phrase.split(' ').filter(word => word.trim() !== '').length;
-            
-            // Генерируем соответствующее количество фантастических слогов
-            const prng = seedRandom(clickCount * 1000 + phrase.length);
-            const fantasyWords = [];
-            for (let i = 0; i < wordCount; i++) {
-                const index = Math.floor(prng() * fantasySyllables.length);
-                fantasyWords.push(fantasySyllables[index]);
-            }
-            
-            return fantasyWords.join(' ');
+        // Функция затемнения экрана
+        function triggerDarkening() {
+            const darkOverlay = document.getElementById('dark-overlay');
+            darkOverlay.classList.add('active');
         }
 
         // Инициализация
@@ -682,7 +809,20 @@
             const generateBtn = document.getElementById('generate-btn');
             
             // Генерация по клику
-            generateBtn.addEventListener('click', displayBookContent);
+            generateBtn.addEventListener('click', () => {
+                displayBookContent();
+                
+                // Проверяем, была ли уже активирована финальная последовательность
+                const bookNumber = parseInt(document.getElementById('book-number').value) || 1;
+                const pageNumber = parseInt(document.getElementById('page-number').value) || 1;
+                
+                if (bookNumber === 1979 && pageNumber === 9987 && hasTriggeredFinalSequence) {
+                    // Добавляем обработчик для затемнения при нажатии кнопки после отображения финального текста
+                    setTimeout(() => {
+                        generateBtn.addEventListener('click', triggerDarkening, { once: true });
+                    }, 100);
+                }
+            });
             
             // Генерация по Enter в полях ввода
             document.getElementById('book-number').addEventListener('keypress', (e) => {
